@@ -59,7 +59,7 @@ function startNexus() {
       ...process.env, 
       HOME: HOME_DIR,
       NEXUS_WORKERS: '1',
-      NODE_OPTIONS: '--max-old-space-size=900'  // <-- naikin jadi 900MB
+      NODE_OPTIONS: '--max-old-space-size=384'  // <-- naikin jadi 900MB
     },
     stdio: 'inherit'
   });
