@@ -1,4 +1,5 @@
-const { exec } = require('child_process');
+const { execSync } = require('child_process');
+const fs = require('fs');
 
 const WALLET = process.env.NEXUS_WALLET;
 
@@ -8,12 +9,15 @@ if (!WALLET) {
 }
 
 console.log('Installing Nexus CLI...');
-exec('curl https://cli.nexus.xyz | sh', (err) => {
-  if (err) throw err;
-  
-  console.log('Starting Nexus Node...');
-  exec(`~/.nexus/bin/nexus-cli start --wallet ${WALLET}`, (err, stdout, stderr) => {
-    console.log(stdout);
-    console.error(stderr);
-  });
-});
+execSync('curl -s https://cli.nexus.xyz | sh', { stdio: 'inherit' });
+
+// Path Nexus CLI di Railway container
+const cliPath = '/root/.nexus/bin/nexus-cli';
+
+if (!fs.existsSync(cliPath)) {
+  console.error('Nexus CLI gagal diinstall!');
+  process.exit(1);
+}
+
+console.log('Starting Nexus Node...');
+execSync(`${cliPath} start --wallet ${WALLET}`, { stdio: 'inherit' });
