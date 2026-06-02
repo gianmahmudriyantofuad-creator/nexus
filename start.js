@@ -13,24 +13,13 @@ if (!WALLET) {
 
 fs.mkdirSync(HOME_DIR + '/.nexus', { recursive: true });
 
+// Healthcheck biar Railway gak sleep
 http.createServer(function(req, res) {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end('Nexus Node Running');
 }).listen(PORT, function() {
   console.log('Railway healthcheck server running on port ' + PORT);
 });
-
-// BIKIN SWAP 1GB - WAJIB BUAT RAILWAY TRIAL
-console.log('Creating 1GB swap file...');
-try {
-  execSync('dd if=/dev/zero of=/swapfile bs=1M count=1024', { stdio: 'inherit' });
-  execSync('chmod 600 /swapfile', { stdio: 'inherit' });
-  execSync('mkswap /swapfile', { stdio: 'inherit' });
-  execSync('swapon /swapfile', { stdio: 'inherit' });
-  console.log('Swap 1GB active');
-} catch (e) {
-  console.log('Swap failed:', e.message);
-}
 
 function startNexus() {
   console.log('Installing Nexus CLI...');
@@ -53,20 +42,20 @@ function startNexus() {
     env: { ...process.env, HOME: HOME_DIR }
   });
 
-  console.log('\n=== Start Node ===');
+  console.log('\n=== Start Node - 500MB Mode ===');
   const child = spawn(cliPath, ['start', '--headless'], {
     env: { 
       ...process.env, 
       HOME: HOME_DIR,
-      NEXUS_WORKERS: '2',
-      NODE_OPTIONS: '--max-old-space-size=384'  // <-- naikin jadi 900MB
+      NEXUS_WORKERS: '1',                    // 1 worker aja
+      NODE_OPTIONS: '--max-old-space-size=350' // Limit 350MB, sisain 150MB buat sistem
     },
     stdio: 'inherit'
   });
 
   child.on('exit', function(code) {
-    console.error('Nexus CLI exited with code ' + code + ', restarting in 10s...');
-    setTimeout(startNexus, 10000);
+    console.error('Nexus CLI exited with code ' + code + ', restart 15s...');
+    setTimeout(startNexus, 15000); // restart 15 detik kalau crash
   });
 }
 
