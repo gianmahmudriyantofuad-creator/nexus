@@ -13,26 +13,13 @@ if (!WALLET) {
 
 fs.mkdirSync(`${HOME_DIR}/.nexus`, { recursive: true });
 
-// Bikin server dummy biar Railway gak kill proses
+// Healthcheck server buat Railway
 http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end('Nexus Node Running');
 }).listen(PORT, () => {
   console.log(`Railway healthcheck server running on port ${PORT}`);
 });
-
-function run(cmd, desc) {
-  try {
-    console.log(`\n=== ${desc} ===`);
-    execSync(cmd, { 
-      stdio: 'inherit',
-      env: { ...process.env, HOME: HOME_DIR }
-    });
-  } catch (e) {
-    console.error(`\nGAGAL di step: ${desc}`);
-    process.exit(1);
-  }
-}
 
 console.log('Installing Nexus CLI...');
 execSync(`yes | curl -s https://cli.nexus.xyz | sh && source ${HOME_DIR}/.profile`, { 
@@ -46,12 +33,20 @@ if (!fs.existsSync(cliPath)) {
   process.exit(1);
 }
 
+function run(cmd, desc) {
+  console.log(`\n=== ${desc} ===`);
+  execSync(cmd, { 
+    stdio: 'inherit',
+    env: { ...process.env, HOME: HOME_DIR }
+  });
+}
+
 run(`yes | ${cliPath} register-user --wallet-address ${WALLET}`, 'Register User');
 run(`yes | ${cliPath} register-node`, 'Register Node');
 
 console.log('\n=== Start Node ===');
-// Pakai spawn biar gak blocking, jadi server HTTP tetep jalan
-const child = spawn(cliPath, ['start'], {
+// --headless = kunci biar gak crash di Railway
+const child = spawn(cliPath, ['start', '--headless'], {
   env: { ...process.env, HOME: HOME_DIR },
   stdio: 'inherit'
 });
