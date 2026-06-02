@@ -9,7 +9,6 @@ if (!WALLET) {
 }
 
 console.log('Installing Nexus CLI...');
-// Pipe "yes" biar auto accept semua prompt installer
 execSync('yes | curl -s https://cli.nexus.xyz | sh', { stdio: 'inherit' });
 
 const cliPath = '/root/.nexus/bin/nexus-cli';
@@ -20,5 +19,8 @@ if (!fs.existsSync(cliPath)) {
 }
 
 console.log('Starting Nexus Node...');
-// Pipe "yes" juga ke command start biar gak nunggu input
-execSync(`yes | ${cliPath} start --wallet ${WALLET}`, { stdio: 'inherit' });
+// Set env var + pipe yes, tanpa --wallet
+execSync(`yes | NEXUS_WALLET=${WALLET} ${cliPath} start`, { 
+  stdio: 'inherit',
+  env: { ...process.env, NEXUS_WALLET: WALLET }
+});
