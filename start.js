@@ -18,8 +18,18 @@ if (!fs.existsSync(cliPath)) {
   process.exit(1);
 }
 
+console.log('Registering wallet...');
+try {
+  // Register dulu, kalau udah register dia bakal skip otomatis
+  execSync(`yes | NEXUS_WALLET=${WALLET} ${cliPath} register`, { 
+    stdio: 'inherit',
+    env: { ...process.env, NEXUS_WALLET: WALLET }
+  });
+} catch (e) {
+  console.log('Wallet mungkin sudah terdaftar, lanjut...');
+}
+
 console.log('Starting Nexus Node...');
-// Set env var + pipe yes, tanpa --wallet
 execSync(`yes | NEXUS_WALLET=${WALLET} ${cliPath} start`, { 
   stdio: 'inherit',
   env: { ...process.env, NEXUS_WALLET: WALLET }
