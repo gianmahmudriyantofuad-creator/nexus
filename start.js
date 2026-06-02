@@ -9,7 +9,6 @@ if (!WALLET) {
   process.exit(1);
 }
 
-// Buat folder .nexus biar Nexus bisa simpan config
 fs.mkdirSync(`${HOME_DIR}/.nexus`, { recursive: true });
 
 function run(cmd, desc) {
@@ -33,5 +32,8 @@ if (!fs.existsSync(cliPath)) {
   process.exit(1);
 }
 
-// Langsung start, gak usah register. Wallet diambil dari env
-run(`yes | NEXUS_WALLET=${WALLET} ${cliPath} start`, 'Start Node');
+// Step 1: Register user dulu
+run(`yes | ${cliPath} register-user --wallet-address ${WALLET}`, 'Register User');
+
+// Step 2: Baru start node
+run(`${cliPath} start`, 'Start Node');
