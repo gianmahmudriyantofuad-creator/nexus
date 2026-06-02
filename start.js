@@ -20,56 +20,54 @@ http.createServer(function(req, res) {
   console.log('Railway healthcheck server running on port ' + PORT);
 });
 
-// BIKIN SWAP 512MB - INI KUNCINYA
-console.log('Creating swap file...');
+// BIKIN SWAP 1GB - WAJIB BUAT RAILWAY TRIAL
+console.log('Creating 1GB swap file...');
 try {
-  execSync('dd if=/dev/zero of=/swapfile bs=1M count=512', { stdio: 'inherit' });
+  execSync('dd if=/dev/zero of=/swapfile bs=1M count=1024', { stdio: 'inherit' });
   execSync('chmod 600 /swapfile', { stdio: 'inherit' });
   execSync('mkswap /swapfile', { stdio: 'inherit' });
   execSync('swapon /swapfile', { stdio: 'inherit' });
-  console.log('Swap 512MB active');
+  console.log('Swap 1GB active');
 } catch (e) {
-  console.log('Swap failed, continuing anyway');
+  console.log('Swap failed:', e.message);
 }
 
-console.log('Installing Nexus CLI...');
-execSync('yes | curl -s https://cli.nexus.xyz | sh', { 
-  stdio: 'inherit',
-  env: { ...process.env, HOME: HOME_DIR }
-});
+function startNexus() {
+  console.log('Installing Nexus CLI...');
+  execSync('yes | curl -s https://cli.nexus.xyz | sh', { 
+    stdio: 'inherit',
+    env: { ...process.env, HOME: HOME_DIR }
+  });
 
-const cliPath = HOME_DIR + '/.nexus/bin/nexus-cli';
-if (!fs.existsSync(cliPath)) {
-  console.error('ERROR: Nexus CLI gak ketemu di:', cliPath);
-  process.exit(1);
+  const cliPath = HOME_DIR + '/.nexus/bin/nexus-cli';
+
+  console.log('\n=== Register User ===');
+  execSync('yes | ' + cliPath + ' register-user --wallet-address ' + WALLET, { 
+    stdio: 'inherit',
+    env: { ...process.env, HOME: HOME_DIR }
+  });
+
+  console.log('\n=== Register Node ===');
+  execSync('yes | ' + cliPath + ' register-node', { 
+    stdio: 'inherit',
+    env: { ...process.env, HOME: HOME_DIR }
+  });
+
+  console.log('\n=== Start Node ===');
+  const child = spawn(cliPath, ['start', '--headless'], {
+    env: { 
+      ...process.env, 
+      HOME: HOME_DIR,
+      NEXUS_WORKERS: '1',
+      NODE_OPTIONS: '--max-old-space-size=900'  // <-- naikin jadi 900MB
+    },
+    stdio: 'inherit'
+  });
+
+  child.on('exit', function(code) {
+    console.error('Nexus CLI exited with code ' + code + ', restarting in 10s...');
+    setTimeout(startNexus, 10000);
+  });
 }
 
-console.log('Found nexus-cli at:', cliPath);
-
-console.log('\n=== Register User ===');
-execSync('yes | ' + cliPath + ' register-user --wallet-address ' + WALLET, { 
-  stdio: 'inherit',
-  env: { ...process.env, HOME: HOME_DIR }
-});
-
-console.log('\n=== Register Node ===');
-execSync('yes | ' + cliPath + ' register-node', { 
-  stdio: 'inherit',
-  env: { ...process.env, HOME: HOME_DIR }
-});
-
-console.log('\n=== Start Node ===');
-const child = spawn(cliPath, ['start', '--headless'], {
-  env: { 
-    ...process.env, 
-    HOME: HOME_DIR,
-    NEXUS_WORKERS: '1',
-    NODE_OPTIONS: '--max-old-space-size=256'
-  },
-  stdio: 'inherit'
-});
-
-child.on('exit', function(code) {
-  console.error('Nexus CLI exited with code ' + code);
-  process.exit(code);
-});
+startNexus();
