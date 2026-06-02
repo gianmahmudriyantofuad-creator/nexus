@@ -58,7 +58,7 @@ function startNexus() {
     env: { 
       ...process.env, 
       HOME: HOME_DIR,
-      NEXUS_WORKERS: '1',
+      NEXUS_WORKERS: '2',
       NODE_OPTIONS: '--max-old-space-size=384'  // <-- naikin jadi 900MB
     },
     stdio: 'inherit'
