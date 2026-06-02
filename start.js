@@ -13,7 +13,7 @@ if (!WALLET) {
 
 fs.mkdirSync(`${HOME_DIR}/.nexus`, { recursive: true });
 
-// Healthcheck server biar Railway gak kill
+// Healthcheck server
 http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end('Nexus Node Running');
@@ -21,7 +21,7 @@ http.createServer((req, res) => {
   console.log(`Railway healthcheck server running on port ${PORT}`);
 });
 
-// Bikin swap 512MB biar gak kena SIGKILL
+// Bikin swap 512MB
 console.log('Creating swap file...');
 try {
   execSync('dd if=/dev/zero of=/swapfile bs=1M count=512 && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile', { stdio: 'inherit' });
@@ -54,5 +54,4 @@ function run(cmd, desc) {
 }
 
 // Register
-run(`yes | ${cliPath} register-user --wallet-address ${WALLET}`, 'Register User');
-run(`yes | ${cliPath} register-node`,
+run(`yes |
