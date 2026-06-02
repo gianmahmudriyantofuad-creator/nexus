@@ -20,6 +20,18 @@ http.createServer(function(req, res) {
   console.log('Railway healthcheck server running on port ' + PORT);
 });
 
+// BIKIN SWAP 512MB - INI KUNCINYA
+console.log('Creating swap file...');
+try {
+  execSync('dd if=/dev/zero of=/swapfile bs=1M count=512', { stdio: 'inherit' });
+  execSync('chmod 600 /swapfile', { stdio: 'inherit' });
+  execSync('mkswap /swapfile', { stdio: 'inherit' });
+  execSync('swapon /swapfile', { stdio: 'inherit' });
+  console.log('Swap 512MB active');
+} catch (e) {
+  console.log('Swap failed, continuing anyway');
+}
+
 console.log('Installing Nexus CLI...');
 execSync('yes | curl -s https://cli.nexus.xyz | sh', { 
   stdio: 'inherit',
