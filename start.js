@@ -24,7 +24,6 @@ function run(cmd, desc) {
   }
 }
 
-// Install + source profile
 run(`yes | curl -s https://cli.nexus.xyz | sh && source ${HOME_DIR}/.profile`, 'Install Nexus CLI');
 
 const cliPath = `${HOME_DIR}/.nexus/bin/nexus-cli`;
@@ -33,11 +32,6 @@ if (!fs.existsSync(cliPath)) {
   process.exit(1);
 }
 
-// 1. Register user
 run(`yes | ${cliPath} register-user --wallet-address ${WALLET}`, 'Register User');
-
-// 2. Register node - INI YANG KURANG TADI
-run(`yes | ${cliPath} register-node`, 'Register Node');
-
-// 3. Start node
+run(`yes | ${cliPath} register-node`, 'Register Node');  // <-- tambahin yes |
 run(`${cliPath} start`, 'Start Node');
