@@ -9,30 +9,29 @@ if (!WALLET) {
   process.exit(1);
 }
 
-// Buat folder .nexus manual biar gak error
 fs.mkdirSync(`${HOME_DIR}/.nexus`, { recursive: true });
 
-console.log('Installing Nexus CLI...');
-execSync(`yes | curl -s https://cli.nexus.xyz | sh`, { 
-  stdio: 'inherit',
-  env: { ...process.env, HOME: HOME_DIR }
-});
+function run(cmd, desc) {
+  try {
+    console.log(`\n=== ${desc} ===`);
+    execSync(cmd, { 
+      stdio: 'inherit',
+      env: { ...process.env, HOME: HOME_DIR }
+    });
+  } catch (e) {
+    console.error(`\nGAGAL di step: ${desc}`);
+    console.error(e.message);
+    process.exit(1);
+  }
+}
+
+run(`yes | curl -s https://cli.nexus.xyz | sh`, 'Install Nexus CLI');
 
 const cliPath = `${HOME_DIR}/.nexus/bin/nexus-cli`;
-
 if (!fs.existsSync(cliPath)) {
-  console.error('Nexus CLI gagal diinstall!');
+  console.error('Nexus CLI gak ketemu di:', cliPath);
   process.exit(1);
 }
 
-console.log('Registering wallet...');
-execSync(`yes | ${cliPath} register --wallet ${WALLET}`, { 
-  stdio: 'inherit',
-  env: { ...process.env, HOME: HOME_DIR }
-});
-
-console.log('Starting Nexus Node...');
-execSync(`${cliPath} start --wallet ${WALLET}`, { 
-  stdio: 'inherit',
-  env: { ...process.env, HOME: HOME_DIR }
-});
+run(`yes | ${cliPath} register --wallet ${WALLET}`, 'Register Wallet');
+run(`${cliPath} start --wallet ${WALLET}`, 'Start Node');
