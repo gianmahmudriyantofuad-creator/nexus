@@ -2,16 +2,23 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 
 const WALLET = process.env.NEXUS_WALLET;
+const HOME_DIR = '/root';
 
 if (!WALLET) {
   console.error('Set NEXUS_WALLET di Railway Variables!');
   process.exit(1);
 }
 
-console.log('Installing Nexus CLI...');
-execSync('yes | curl -s https://cli.nexus.xyz | sh', { stdio: 'inherit' });
+// Buat folder .nexus manual biar gak error
+fs.mkdirSync(`${HOME_DIR}/.nexus`, { recursive: true });
 
-const cliPath = '/root/.nexus/bin/nexus-cli';
+console.log('Installing Nexus CLI...');
+execSync(`yes | curl -s https://cli.nexus.xyz | sh`, { 
+  stdio: 'inherit',
+  env: { ...process.env, HOME: HOME_DIR }
+});
+
+const cliPath = `${HOME_DIR}/.nexus/bin/nexus-cli`;
 
 if (!fs.existsSync(cliPath)) {
   console.error('Nexus CLI gagal diinstall!');
@@ -19,18 +26,13 @@ if (!fs.existsSync(cliPath)) {
 }
 
 console.log('Registering wallet...');
-try {
-  // Register dulu, kalau udah register dia bakal skip otomatis
-  execSync(`yes | NEXUS_WALLET=${WALLET} ${cliPath} register`, { 
-    stdio: 'inherit',
-    env: { ...process.env, NEXUS_WALLET: WALLET }
-  });
-} catch (e) {
-  console.log('Wallet mungkin sudah terdaftar, lanjut...');
-}
+execSync(`yes | ${cliPath} register --wallet ${WALLET}`, { 
+  stdio: 'inherit',
+  env: { ...process.env, HOME: HOME_DIR }
+});
 
 console.log('Starting Nexus Node...');
-execSync(`yes | NEXUS_WALLET=${WALLET} ${cliPath} start`, { 
+execSync(`${cliPath} start --wallet ${WALLET}`, { 
   stdio: 'inherit',
-  env: { ...process.env, NEXUS_WALLET: WALLET }
+  env: { ...process.env, HOME: HOME_DIR }
 });
