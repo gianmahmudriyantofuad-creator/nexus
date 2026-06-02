@@ -48,7 +48,7 @@ function startNexus() {
       ...process.env, 
       HOME: HOME_DIR,
       NEXUS_WORKERS: '1',                    // 1 worker aja
-      NODE_OPTIONS: '--max-old-space-size=350' // Limit 350MB, sisain 150MB buat sistem
+      NODE_OPTIONS: '--max-old-space-size=200' // Limit 350MB, sisain 150MB buat sistem
     },
     stdio: 'inherit'
   });
