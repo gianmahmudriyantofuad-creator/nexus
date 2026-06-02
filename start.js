@@ -11,7 +11,6 @@ if (!WALLET) {
 console.log('Installing Nexus CLI...');
 execSync('curl -s https://cli.nexus.xyz | sh', { stdio: 'inherit' });
 
-// Path Nexus CLI di Railway container
 const cliPath = '/root/.nexus/bin/nexus-cli';
 
 if (!fs.existsSync(cliPath)) {
@@ -20,4 +19,5 @@ if (!fs.existsSync(cliPath)) {
 }
 
 console.log('Starting Nexus Node...');
-execSync(`${cliPath} start --wallet ${WALLET}`, { stdio: 'inherit' });
+// Tambahin --non-interactive biar gak nunggu input
+execSync(`${cliPath} start --wallet ${WALLET} --non-interactive --accept-terms`, { stdio: 'inherit' });
